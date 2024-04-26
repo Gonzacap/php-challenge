@@ -3,7 +3,8 @@ version: '3'
 services:
 
   php:
-    image: php:7.3-fpm
+    build: docker/php-fpm
+    #image: php:7.3-fpm
     container_name: ${PROJECT_NAME}-php
     working_dir: /app
     volumes:
@@ -17,7 +18,7 @@ services:
       - "80:80"
     volumes:
       - ./app:/var/www/html
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
 
