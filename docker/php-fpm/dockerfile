@@ -1,15 +1,29 @@
-# Utilizamos la imagen base de PHP 7.3 con FPM
-FROM phpdockerio/php73-fpm:latest
+# Use the PHP 7.3 base image
+FROM php:7.3-fpm
 
-# Fix debconf warnings upon build
-ARG DEBIAN_FRONTEND=noninteractive
+# Set the working directory inside the container
+WORKDIR "/app"
 
-# Install selected extensions and other stuff
-RUN apt-get update \
-    && apt-get -y --no-install-recommends install  php7.3-pgsql php7.3-gd php-redis \
-    && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+# Instalar dependencias necesarias para Composer
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install git
-RUN apt-get update \
-    && apt-get -y install git \
-    && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+# Download and install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Create a basic composer.json file if it does not exist
+RUN echo '{}' > composer.json
+
+# Copy the content of the application to the working directory
+COPY . "/app"
+
+# Install PHP dependencies using Composer
+RUN composer install
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
+
+# Command to run PHP-FPM
+CMD ["php-fpm"]
