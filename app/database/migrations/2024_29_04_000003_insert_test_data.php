@@ -2,9 +2,8 @@
 require_once 'vendor/autoload.php';
 
 // use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Database\Capsule\Manager;
 
 class InsertTestData extends Migration
@@ -21,21 +20,21 @@ class InsertTestData extends Migration
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
 
-        DB::table('personas')->insert([
+        $capsule->connection()->table('personas')->insert([
             'nombre' => 'Usuario',
             'apellido' => 'Test',
             'edad' => 30,
             'telefono' => '123456789',
-            'created_at' => Date::now(),
-            'updated_at' => Date::now(),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
-        DB::table('credenciales')->insert([
+        $capsule->connection()->table('credenciales')->insert([
             'brand' => 'Test',
             'client_id' => 'C123',
             'secret_id' => 'S123',
-            'created_at' => Date::now(),
-            'updated_at' => Date::now(),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ]);
     }
 
@@ -51,8 +50,8 @@ class InsertTestData extends Migration
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
 
-        DB::table('personas')->truncate();
+        $capsule->connection()->table('personas')->truncate();
 
-        DB::table('credenciales')->truncate();
+        $capsule->connection()->table('credenciales')->truncate();
     }
 }
