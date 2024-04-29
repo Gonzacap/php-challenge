@@ -43,6 +43,55 @@ $app->get('/', function () use ($app) {
     $app->render('index.html');
 });
 
+/**
+ * Test route
+ * This method list the "personas"
+ */
+$app->get('/list-persona', function () use ($app) {
+    $response = $app->response();
+    $response->headers->set('Content-Type', 'application/json');
+
+    try {
+        $personas = Persona::all();
+
+        $response->status(200);
+        $response->body($personas->toJson());
+    } catch (\Exception $e) {
+        $response->status($e->getCode());
+        $response->body(json_encode([
+            'mensaje' => "Oops! " . PHP_EOL . $e->getMessage()
+        ]));
+    }
+
+    return $response;
+});
+
+/**
+ * Test route
+ * This method list the "credenciales"
+ */
+$app->get('/list-credenciales', function () use ($app) {
+    $response = $app->response();
+    $response->headers->set('Content-Type', 'application/json');
+
+    try {
+        $credenciales = Credenciales::all();
+
+        $response->status(200);
+        $response->body($credenciales->toJson());
+    } catch (\Exception $e) {
+        $response->status($e->getCode());
+        $response->body(json_encode([
+            'mensaje' => "Oops! " . PHP_EOL . $e->getMessage()
+        ]));
+    }
+
+    return $response;
+});
+
+/**
+ * 
+ */
 $app->post('/update-persona/:id/:brand', function ($id, $brand) use ($app) {
 
     $response = $app->response();
@@ -75,13 +124,19 @@ $app->post('/update-persona/:id/:brand', function ($id, $brand) use ($app) {
         ], $_ENV['JWT_KEY']);
 
         // Make a request to the webservice using the JWT as part of the authorization
-        $httpClient = $this->get('HttpClient');
-        $responseFromWebService = $httpClient->request('GET', 'https://example.com/webservice', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $jwt,
-                'Accept' => 'application/json',
-            ]
+        $url = 'https://example.com/webservice';
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => [
+                    'Authorization' => 'Bearer ' . $jwt,
+                    'Accept' => 'application/json',
+                ],
+            ],
         ]);
+
+        $responseFromWebService = file_get_contents($url, false, $context);
 
         // Retrieve the response and decode it
         $data = json_decode($response->getBody(), true);
