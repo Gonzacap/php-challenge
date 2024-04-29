@@ -65,6 +65,9 @@ $app->post('/update-persona/{id}/{brand}', function ($request, $response, $args)
             'Accept' => 'application/json',
         ]
     ]);
+
+    // Retrieve the response and decode it
+    $data = json_decode($response->getBody(), true);
 });
 
 // Run app
