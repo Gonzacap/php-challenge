@@ -29,13 +29,35 @@ try {
     $capsule->setAsGlobal();
     $capsule->bootEloquent();
 
+
+    if ($capsule->getConnection()->getDatabaseName()) {
+        echo "Database connection established successfully.\n";
+    } else {
+        echo "Error establishing database connection.\n";
+        exit(1);
+    }
+
     $repository = new DatabaseMigrationRepository($capsule->getDatabaseManager(), 'migrations');
     $migrator = new Migrator($repository, $capsule->getDatabaseManager(), new Filesystem());
 
-    $pat = __DIR__ . '/../database/migrations';
+    $migrationsPath = __DIR__ . '/../database/migrations';
+
+    if (!is_dir($migrationsPath)) {
+        throw new Exception("Migrations folder does not exist in the specified path: $migrationsPath");
+    }
+
+    $migrationFiles = glob("$migrationsPath/*.php");
+    if (empty($migrationFiles)) {
+        throw new Exception("No migration files found in the folder: $migrationsPath");
+    }
+
+    echo "Migration files found:\n";
+    foreach ($migrationFiles as $file) {
+        echo basename($file) . "\n";
+    }
 
     // Run Migrations
-    $migrator->run($pat);
+    $migrator->run($migrationsPath);
 
     echo "Migrations Done!" . PHP_EOL;
 } catch (\Exception $e) {
