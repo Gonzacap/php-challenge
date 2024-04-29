@@ -47,7 +47,7 @@ $app->post('/update-persona/{id}/{brand}', function ($request, $response, $args)
     if (empty($credenciales)) {
         return $response->withJson([
             'estado' => 0,
-            'mensaje' => 'No se encontraron las credenciales para esta brand'
+            'mensaje' => "Ha ocurrido un error al procesar la solicitud"
         ], 404);
     }
 
