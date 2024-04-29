@@ -4,8 +4,8 @@ require '../vendor/autoload.php';
 use Dotenv\Dotenv;
 use Firebase\JWT\JWT;
 
-use App\Src\Models\Credenciales;
-use App\Src\Models\Persona;
+use App\Models\Credenciales;
+use App\Models\Persona;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
