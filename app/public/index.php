@@ -43,25 +43,29 @@ $app->get('/', function () use ($app) {
     $app->render('index.html');
 });
 
-$app->post('/update-persona/:id/:brand', function ($id, $brand) use ($app, $response) {
+$app->post('/update-persona/:id/:brand', function ($id, $brand) use ($app) {
+
+    $response = $app->response();
+    $response->headers->set('Content-Type', 'application/json');
 
     try {
 
         if (empty($id) || empty($brand)) {
-            // Mising Parameters
-            return $response->withJson([
+            $response->status(400);
+            $response->body(json_encode([
                 'estado' => 0,
                 'mensaje' => "Ha ocurrido un error al procesar la solicitud"
-            ], 400);
+            ]));
         }
 
         $credenciales = Credenciales::where('brand', $brand)->first();
 
         if (empty($credenciales)) {
-            return $response->withJson([
+            $response->status(400);
+            $response->body(json_encode([
                 'estado' => 0,
                 'mensaje' => "Ha ocurrido un error al procesar la solicitud"
-            ], 400);
+            ]));
         }
 
         // Create signed Json Web Token
@@ -91,21 +95,26 @@ $app->post('/update-persona/:id/:brand', function ($id, $brand) use ($app, $resp
 
 
         if ($persona->save()) {
-            return $response->withJson([
+
+            $response->status(200);
+            $response->body(json_encode([
                 'estado' => 1,
                 'mensaje' => "Datos actualizados correctamente"
-            ]);
+            ]));
         } else {
-            return $response->withJson([
+            $response->status(400);
+            $response->body(json_encode([
                 'estado' => 0,
                 'mensaje' => "Ha ocurrido un error al procesar la solicitud"
-            ]);
+            ]));
         }
     } catch (\Exception $e) {
-        return $response->withJson([
+
+        $response->status($e->getCode());
+        $response->body(json_encode([
             'estado' => 0,
             'mensaje' => "Ha ocurrido un error al procesar la solicitud"
-        ], $e->getCode());
+        ]));
     }
 });
 
