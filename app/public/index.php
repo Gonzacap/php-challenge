@@ -37,12 +37,17 @@ $app->get('/', function () use ($app) {
     $app->render('index.html');
 });
 
-$app->post('/update-persona/{id}/{brand}', function ($request, $response, $args) {
+$app->post('/update-persona/:id/:brand', function ($id, $brand) use ($app, $response) {
 
     try {
 
-        $id = $args['id'];
-        $brand = $args['brand'];
+        if (empty($id) || empty($brand)) {
+            // Mising Parameters
+            return $response->withJson([
+                'estado' => 0,
+                'mensaje' => "Ha ocurrido un error al procesar la solicitud"
+            ], 400);
+        }
 
         $credenciales = Credenciales::where('brand', $brand)->first();
 
@@ -50,7 +55,7 @@ $app->post('/update-persona/{id}/{brand}', function ($request, $response, $args)
             return $response->withJson([
                 'estado' => 0,
                 'mensaje' => "Ha ocurrido un error al procesar la solicitud"
-            ], 404);
+            ], 400);
         }
 
         // Create signed Json Web Token
