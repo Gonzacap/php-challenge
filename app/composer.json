@@ -6,6 +6,7 @@
         "slim/extras": "2.*",
         "twig/twig": "1.*",
         "illuminate/database": "^5.8",
+        "illuminate/filesystem": "^5.8",
         "firebase/php-jwt": "5.4"
     }
 }
