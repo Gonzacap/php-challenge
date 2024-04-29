@@ -4,10 +4,11 @@ FROM php:7.3-fpm
 # Set the working directory inside the container
 WORKDIR "/app"
 
-# Instalar dependencias necesarias para Composer
+# Install necessary dependencies for Composer and PostgreSQL driver
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Composer
@@ -16,11 +17,14 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Create a basic composer.json file if it does not exist
 RUN echo '{}' > composer.json
 
-# Copy the content of the application to the working directory
-COPY . "/app"
-
 # Install PHP dependencies using Composer
 RUN composer install
+
+# Install PDO PostgreSQL driver
+RUN docker-php-ext-install pdo pdo_pgsql
+
+# Copy the content of the application to the working directory
+COPY . "/app"
 
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
