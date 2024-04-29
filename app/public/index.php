@@ -39,54 +39,62 @@ $app->get('/', function () use ($app) {
 
 $app->post('/update-persona/{id}/{brand}', function ($request, $response, $args) {
 
-    $id = $args['id'];
-    $brand = $args['brand'];
+    try {
 
-    $credenciales = Credenciales::where('brand', $brand)->first();
+        $id = $args['id'];
+        $brand = $args['brand'];
 
-    if (empty($credenciales)) {
+        $credenciales = Credenciales::where('brand', $brand)->first();
+
+        if (empty($credenciales)) {
+            return $response->withJson([
+                'estado' => 0,
+                'mensaje' => "Ha ocurrido un error al procesar la solicitud"
+            ], 404);
+        }
+
+        // Create signed Json Web Token
+        $jwt = JWT::encode([
+            'client_id' => $credenciales->client_id,
+            'secret_id' => $credenciales->secret_id,
+        ], $_ENV['JWT_KEY']);
+
+        // Make a request to the webservice using the JWT as part of the authorization
+        $httpClient = $this->get('HttpClient');
+        $responseFromWebService = $httpClient->request('GET', 'https://example.com/webservice', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $jwt,
+                'Accept' => 'application/json',
+            ]
+        ]);
+
+        // Retrieve the response and decode it
+        $data = json_decode($response->getBody(), true);
+
+        // Update Persona in the DB
+        $persona = Persona::find($id);
+        $persona->nombre = $data['nombre'];
+        $persona->apellido = $data['apellido'];
+        $persona->edad = $data['edad'];
+        $persona->telefono = $data['telefono'];
+
+
+        if ($persona->save()) {
+            return $response->withJson([
+                'estado' => 1,
+                'mensaje' => "Datos actualizados correctamente"
+            ]);
+        } else {
+            return $response->withJson([
+                'estado' => 0,
+                'mensaje' => "Ha ocurrido un error al procesar la solicitud"
+            ]);
+        }
+    } catch (\Exception $e) {
         return $response->withJson([
             'estado' => 0,
             'mensaje' => "Ha ocurrido un error al procesar la solicitud"
-        ], 404);
-    }
-
-    // Create signed Json Web Token
-    $jwt = JWT::encode([
-        'client_id' => $credenciales->client_id,
-        'secret_id' => $credenciales->secret_id,
-    ], $_ENV['JWT_KEY']);
-
-    // Make a request to the webservice using the JWT as part of the authorization
-    $httpClient = $this->get('HttpClient');
-    $responseFromWebService = $httpClient->request('GET', 'https://example.com/webservice', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $jwt,
-            'Accept' => 'application/json',
-        ]
-    ]);
-
-    // Retrieve the response and decode it
-    $data = json_decode($response->getBody(), true);
-
-    // Update Persona in the DB
-    $persona = Persona::find($id);
-    $persona->nombre = $data['nombre'];
-    $persona->apellido = $data['apellido'];
-    $persona->edad = $data['edad'];
-    $persona->telefono = $data['telefono'];
-
-
-    if ($persona->save()) {
-        return $response->withJson([
-            'estado' => 1,
-            'mensaje' => "Datos actualizados correctamente"
-        ]);
-    } else {
-        return $response->withJson([
-            'estado' => 0,
-            'mensaje' => "Ha ocurrido un error al procesar la solicitud"
-        ]);
+        ], $e->getCode());
     }
 });
 
