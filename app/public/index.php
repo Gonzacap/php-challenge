@@ -68,6 +68,26 @@ $app->post('/update-persona/{id}/{brand}', function ($request, $response, $args)
 
     // Retrieve the response and decode it
     $data = json_decode($response->getBody(), true);
+
+    // Update Persona in the DB
+    $persona = Persona::find($id);
+    $persona->nombre = $data['nombre'];
+    $persona->apellido = $data['apellido'];
+    $persona->edad = $data['edad'];
+    $persona->telefono = $data['telefono'];
+
+
+    if ($persona->save()) {
+        return $response->withJson([
+            'estado' => 1,
+            'mensaje' => "Datos actualizados correctamente"
+        ]);
+    } else {
+        return $response->withJson([
+            'estado' => 0,
+            'mensaje' => "Ha ocurrido un error al procesar la solicitud"
+        ]);
+    }
 });
 
 // Run app
