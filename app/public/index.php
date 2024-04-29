@@ -3,12 +3,18 @@ require '../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use Firebase\JWT\JWT;
+use Illuminate\Database\Capsule\Manager;
 
 use App\Models\Credenciales;
 use App\Models\Persona;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
+
+$capsule = new Manager;
+$capsule->addConnection(require __DIR__ . '/../config/database.php');
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
 
 // Prepare app
 $app = new \Slim\Slim(array(
